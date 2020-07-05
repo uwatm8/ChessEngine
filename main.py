@@ -68,46 +68,26 @@ def getFirstMove(board):
 def getBestMove1Depth(board):
     legalMoves = getLegalMoves(board)
 
+    bestScore = -10000
+    colorScoreCorrection = 1
     bestMove = ""
 
-
-    if board.turn == chess.WHITE:
-        bestScore = -10000
-
-        for move in legalMoves:
-            move = str(move)
-
-            board.push(chess.Move.from_uci(move))
-
-            moveScore = getScorePieces(board)
-
-            print("movescore: ", moveScore)
-
-            if moveScore > bestScore:
-                bestScore = moveScore
-                bestMove = move
-
-            # Reset board
-            board.pop()
-
     if board.turn == chess.BLACK:
-        bestScore = 10000
+        colorScoreCorrection = -1
 
-        for move in legalMoves:
-            move = str(move)
+    for move in legalMoves:
+        move = str(move)
 
-            board.push(chess.Move.from_uci(move))
+        board.push(chess.Move.from_uci(move))
 
-            moveScore = getScorePieces(board)
+        moveScore = getScorePieces(board) * colorScoreCorrection
 
-            print("movescore: ", moveScore)
+        if moveScore > bestScore:
+            bestScore = moveScore
+            bestMove = move
 
-            if moveScore < bestScore:
-                bestScore = moveScore
-                bestMove = move
-
-            # Reset board
-            board.pop()
+        # Reset board
+        board.pop()
 
     return bestMove
 
