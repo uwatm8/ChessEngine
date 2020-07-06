@@ -6,7 +6,7 @@ board = chess.Board()
 legalMoves = []
 
 maxMoves = 1000
-maxGames = 1
+maxGames = 10
 
 def getLegalMoves(board):
     legalMoves = []
@@ -51,13 +51,22 @@ def getScorePieces(board):
 
     score = 0
 
+    if board.is_stalemate():
+        #print("HYPOTHETICAL STALEMATE")
+        return 0
+
+    if board.can_claim_draw():
+        # todo do min/max depending if below/over 0
+        # print("CAN CLAIM DRAW")
+        return 0
+
     for char in chars:
 
         # Black pieces
         if char == "r":
             score -= 5
         elif char == "n":
-            score -= 3
+            score -= 2.9
         elif char == "q":
             score -= 9
         elif char == "b":
@@ -71,7 +80,7 @@ def getScorePieces(board):
         elif char == "R":
             score += 5
         elif char == "N":
-            score += 3
+            score += 2.9
         elif char == "Q":
             score += 9
         elif char == "B":
@@ -139,20 +148,11 @@ def getBestMove2Depth(board):
     for move in legalMoves:
         move = str(move)
 
-
         makeBoardMove(board, move)
-
-
         bestOpponentMove = getBestMove1Depth(board)
         makeBoardMove(board, bestOpponentMove)
 
-        #bestMoveDepth2 = getBestMove1Depth(board)
-        #makeBoardMove(board, bestMoveDepth2)
-
-        # *-1 since its opponentes turn
         scoreD2 = getScorePieces(board) * colorScoreCorrection
-
-
 
 
         if scoreD2 > bestScore:
@@ -161,9 +161,36 @@ def getBestMove2Depth(board):
 
         resetBoard(board)
 
+    return bestMove
 
-    #print("legal moves: ", legalMoves)
-    #print("making move: ", bestMove)
+
+def getBestMove3Depth(board):
+
+    legalMoves = getLegalMoves(board)
+
+    bestScore = -10000
+    colorScoreCorrection = 1
+    bestMove = ""
+
+    if board.turn == chess.BLACK:
+        colorScoreCorrection = -1
+
+    for move in legalMoves:
+        move = str(move)
+
+        makeBoardMove(board, move)
+        bestOpponentMove = getBestMove2Depth(board)
+        makeBoardMove(board, bestOpponentMove)
+
+        scoreD2 = getScorePieces(board) * colorScoreCorrection *-1
+
+
+        if scoreD2 > bestScore:
+            bestScore = scoreD2
+            bestMove = move
+
+        resetBoard(board)
+
     return bestMove
 
 
@@ -395,7 +422,7 @@ for g in range(maxGames):
         move = ""
         if board.turn == chess.WHITE:
             #move = getBestMove2Depthv3(board)
-            move = getBestMove2Depth(board)
+            move = getBestMove3Depth(board)
 
         if board.turn == chess.BLACK:
             move = getMoveRandom(board)
@@ -404,7 +431,7 @@ for g in range(maxGames):
 
         movesMade += 1
 
-        print("moves made: ", movesMade)
+        #print("moves made: ", movesMade)
 
         #board.push(chess.Move.from_uci(move))
 
@@ -413,7 +440,7 @@ for g in range(maxGames):
         else:
             node = node.add_main_variation(chess.Move.from_uci(move))
 
-        node.comment = "value: " + str(getScorePieces(board))
+        #node.comment = "value: " + str(getScorePieces(board))
 
 
 
