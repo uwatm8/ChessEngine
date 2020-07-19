@@ -207,13 +207,13 @@ def getBestMoveSearchTree(board, nNodes):
     for sortedMove in sortedMoves:
 
         if True:
-            queue.append(sortedMove)
+            queue.append([sortedMove[0]])
         else:
             if board.turn == chess.WHITE:
-                queue.append(sortedMove)
+                queue.append([sortedMove[0]])
 
             elif board.turn == chess.BLACK:
-                queue.insert(0, sortedMove)
+                queue.insert(0, [sortedMove[0]])
 
 
     print("queue", queue)
@@ -223,24 +223,15 @@ def getBestMoveSearchTree(board, nNodes):
     while(searchedNodes < nNodes):
         searchedNodes += 1
 
-        queueMove = queue.pop()
+        if len(queue) == 0:
+            break
 
-        nextMove = queueMove[0]
+        queueMove = queue.pop()
 
         print(" ")
         print("queueMove", len(queueMove) )
         print("queueMove", queueMove )
-        print("queueMoveMoves", queueMove[1]["moves"] )
         print(" ")
-
-        hasMoreDepth = True
-
-        while hasMoreDepth:
-            searchDepth += 1
-
-            if isEmptyDict(queueMove[1]["moves"]):
-                hasMoreDepth = False
-
 
         #sortedMoves = sorted(moves.items(), key=lambda x: x[1][SCORE])
         #print("   ")
@@ -248,7 +239,7 @@ def getBestMoveSearchTree(board, nNodes):
         #print("sorted moves", json.dumps(sortedMoves, indent= 4))
 
         #print("   ")
-        #print("actual moves", json.dumps(moves, indent= 4))
+
 
         #print("normal moves", moves)
         #print(" ")
@@ -256,15 +247,21 @@ def getBestMoveSearchTree(board, nNodes):
         # init with random move
         #nextMove = getMoveRandom(board)
 
-        if board.turn == chess.WHITE:
-            #nextMove = sortedMoves[len(sortedMoves)-1][0]
-            nextMove = queue[len(sortedMoves)-1][0]
+        while len(queueMove)>0:
+            searchDepth += 1
+            nextMove = queueMove.pop()
 
-        elif board.turn == chess.BLACK:
-            #nextMove = sortedMoves[0][0]
-            nextMove = queue[0][0]
+            if False:
+                if board.turn == chess.WHITE:
+                    #nextMove = sortedMoves[len(sortedMoves)-1][0]
+                    nextMove = queue[len(sortedMoves)-1]
 
-        makeBoardMove(board, nextMove)
+                elif board.turn == chess.BLACK:
+                    #nextMove = sortedMoves[0][0]
+                    nextMove = queue[0]
+
+            makeBoardMove(board, nextMove)
+
         legalMoves = getLegalMoves(board)
 
         currentMoveTree = moves[nextMove][MOVES]
@@ -273,75 +270,62 @@ def getBestMoveSearchTree(board, nNodes):
         maxScore = -10000
 
         for move in legalMoves:
-            currentMoveTree[move] = {}
+            #currentMoveTree[move] = {}
 
             score = getScoreAfterMove(board, move)
-            currentMoveTree[move][SCORE] = score
-            currentMoveTree[move][MOVES] = {}
+            #currentMoveTree[move][SCORE] = score
+            #currentMoveTree[move][MOVES] = {}
 
             maxScore = max(maxScore, score)
             minScore = min(minScore, score)
 
             # propegate score upwards (TODO?)
-            moveVar = moves[nextMove]
+            prevMoveNode = moves[nextMove]
             if board.turn == chess.WHITE:
-                moveVar["score"] = minScore
+                prevMoveNode["score"] = minScore
             elif board.turn == chess.BLACK:
-                moveVar["score"] = maxScore
+                prevMoveNode["score"] = maxScore
+
+            prevMoveNode[move] = {}
+
+            prevMoveNode[move]["score"] = score
+            prevMoveNode[move]["moves"] = {}
 
             nextQueueMove = []
-            nextQueueMove.append(move)
             nextQueueMove.insert(0,nextMove)
+            nextQueueMove.append(move)
 
             print("nextQueueMove", nextQueueMove)
 
             queue.append(nextQueueMove)
 
+        print("queue", queue)
+
         moves[nextMove][MOVES] = currentMoveTree
         #print("actual moves", json.dumps(moves, indent= 4))
 
         # board is reset to current state
-        resetBoardX(board, 1)
+        resetBoardX(board, searchDepth)
+        searchDepth = 0
 
             #moves[move] = {}
             #moves[move][SCORE] = getScoreAfterMove(board, move)
             #moves[move][MOVES] = {}
 
+        print("actual moves", json.dumps(moves, indent= 4))
 
+        sortedMoves = sorted(moves.items(), key=lambda x: x[1][SCORE])
 
-        #print("    ")
-        #print("nextmove", nextMove)
-        #print("aaaa", moves[nextMove])
+        bestMove = ""
 
+        if board.turn == chess.WHITE:
+            bestMove = sortedMoves[len(sortedMoves)-1][0]
 
+        elif board.turn == chess.BLACK:
+            bestMove = sortedMoves[0][0]
 
-
-
-
-
-
-
-        #sortedmoves = sorted(moves.items(), key=lambda x: x[1])
-        #moves = sortedmoves
-
-
-
-
-        if False:
-            for tuple in moves:
-                move = tuple[0]
-                score = tuple[1]
-
-                for i in range(len(sortedmoves)):
-                    queue.append(move)
-
-
-
-            boardToSearch = makeBoardMove(bestMove)
-
-
-
-    #sortedmoves = sorted(moves.items(), key=lambda x: x[1])
+    #resetBoardX(board, 1)
+    #sortedMoves = sorted(moves.items(), key=lambda x: x[1][SCORE])
 
     if board.turn == chess.WHITE:
         # take last element "highest score"
@@ -351,18 +335,41 @@ def getBestMoveSearchTree(board, nNodes):
         bestMove = str(sortedMoves[0][0])
 
 
-
-
-
-
-    if False:
-        for key in moves:
-            print("score", key, " : ", moves[key])
-
-        for i in sorted (moves):
-            print("move :", moves[i])
-            print("moveI:", i)
-
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
+    print("________________________________________________________________")
     return str(bestMove)
 
 
@@ -657,7 +664,7 @@ for g in range(maxGames):
             move = getBestMove2Depth(board)
 
         if board.turn == chess.BLACK:
-            move = getBestMoveSearchTree(board, 1)
+            move = getBestMoveSearchTree(board, 2)
             #move = getBestMove3Depth(board)
             #move = getBestMove2Depth(board)
 
