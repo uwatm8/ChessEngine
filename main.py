@@ -2,6 +2,7 @@ import chess
 import chess.pgn
 import math
 from collections.abc import Mapping
+import json
 from random import randrange
 
 board = chess.Board()
@@ -14,7 +15,7 @@ def getLegalMoves(board):
     legalMoves = []
 
     for move in board.legal_moves:
-        legalMoves.append(move)
+        legalMoves.append(str(move))
     return legalMoves
 
 def split(word):
@@ -27,6 +28,7 @@ currentDepth = 0
 movesMade = 0
 
 def makeBoardMove(board, move):
+    move = str(move)
     global currentDepth
     if move != "":
         board.push(chess.Move.from_uci(move))
@@ -181,7 +183,7 @@ def getBestMoveSearchTree(board, nNodes):
 
     bestMove = getMoveRandom(board)
 
-    scores = {}
+    moves = {}
 
     searchedNodes = 0
 
@@ -196,38 +198,93 @@ def getBestMoveSearchTree(board, nNodes):
     if len(legalMoves) == 0:
         return ""
 
-    for move in legalMoves:
-        scores[move] = getScoreAfterMove(board, move)
+    SCORE = "score"
+    MOVES = "moves"
 
-    sortedScores = sorted(scores.items(), key=lambda x: x[1])
-    scores = sortedScores
+    for move in legalMoves:
+        moves[move] = {}
+        moves[move][SCORE] = getScoreAfterMove(board, move)
+        moves[move][MOVES] = {}
+
+
+    #print("mov", moves['g8f6'])
+
+
+
 
     # always start from current board state
     while(searchedNodes < nNodes):
         searchedNodes += 1
 
+        sortedMoves = sorted(moves.items(), key=lambda x: x[1][SCORE])
+        print("   ")
+        #print("sorted moves", sortedMoves)
+        print("sorted moves", json.dumps(sortedMoves, indent= 4))
+
+        print("   ")
+        print("actual moves", json.dumps(moves, indent= 4))
+
+        #print("normal moves", moves)
+        print(" ")
+
+        # init with random move
+        nextMove = getMoveRandom(board)
+
         if board.turn == chess.WHITE:
-            bestMove = str(sortedScores[len(sortedScores)-1][0])
+            nextMove = sortedMoves[len(sortedMoves)-1][0]
 
-            pass
         elif board.turn == chess.BLACK:
-            bestMove = str(sortedScores[0][0])
-
-            pass
+            nextMove = sortedMoves[0][0]
 
 
-        #sortedScores = sorted(scores.items(), key=lambda x: x[1])
-        #scores = sortedScores
+        makeBoardMove(board, nextMove)
+
+
+        legalMoves = getLegalMoves(board)
+
+        currentMoveTree = moves[nextMove][MOVES]
+
+        for move in legalMoves:
+            currentMoveTree[move] = {}
+            currentMoveTree[move][SCORE] = getScoreAfterMove(board, move)
+            currentMoveTree[move][MOVES] = {}
+
+
+        moves[nextMove][MOVES] = currentMoveTree
+        print("actual moves", json.dumps(moves, indent= 4))
+
+
+
+            #moves[move] = {}
+            #moves[move][SCORE] = getScoreAfterMove(board, move)
+            #moves[move][MOVES] = {}
+
+
+
+        print("    ")
+        print("nextmove", nextMove)
+        print("aaaa", moves[nextMove])
+
+
+
+
+
+
+
+
+
+        #sortedmoves = sorted(moves.items(), key=lambda x: x[1])
+        #moves = sortedmoves
 
 
 
 
         if False:
-            for tuple in scores:
+            for tuple in moves:
                 move = tuple[0]
                 score = tuple[1]
 
-                for i in range(len(sortedScores)):
+                for i in range(len(sortedmoves)):
                     queue.append(move)
 
 
@@ -236,31 +293,29 @@ def getBestMoveSearchTree(board, nNodes):
 
 
 
-    #sortedScores = sorted(scores.items(), key=lambda x: x[1])
+    #sortedmoves = sorted(moves.items(), key=lambda x: x[1])
 
     if board.turn == chess.WHITE:
         # take last element "highest score"
-        bestMove = str(sortedScores[len(sortedScores)-1][0])
+        bestMove = str(sortedMoves[len(sortedMoves)-1][0])
     elif board.turn == chess.BLACK:
         # take first element "lowest score"
-        bestMove = str(sortedScores[0][0])
+        bestMove = str(sortedMoves[0][0])
 
 
-    scores = sortedScores
 
-    print("sorted:", sortedScores)
 
 
 
     if False:
-        for key in scores:
-            print("score", key, " : ", scores[key])
+        for key in moves:
+            print("score", key, " : ", moves[key])
 
-        for i in sorted (scores):
-            print("move :", scores[i])
+        for i in sorted (moves):
+            print("move :", moves[i])
             print("moveI:", i)
 
-    return bestMove
+    return str(bestMove)
 
 
 def getBestMove2Depth(board):
@@ -565,7 +620,7 @@ for g in range(maxGames):
 
         #board.push(chess.Move.from_uci(move))
 
-        print("trying move", move)
+        #print("trying move", move)
 
         if m == 0:
             node = savedGame.add_main_variation(chess.Move.from_uci(move))
