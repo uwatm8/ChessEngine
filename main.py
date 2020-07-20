@@ -181,6 +181,48 @@ def getScoreAfterMove(board, move):
 
     return score
 
+
+def searchNode(board, node, moves, previousMove):
+    minScore = 10000
+    maxScore = -10000
+
+    legalMoves = getLegalMoves(board)
+
+    for move in legalMoves:
+        #currentMoveTree[move] = {}
+
+        score = getScoreAfterMove(board, move)
+        #currentMoveTree[move][SCORE] = score
+        #currentMoveTree[move][MOVES] = {}
+
+        maxScore = max(maxScore, score)
+        minScore = min(minScore, score)
+
+        # propegate score upwards (TODO?)
+        if board.turn == chess.WHITE:
+            node["score"] = maxScore
+        elif board.turn == chess.BLACK:
+            node["score"] = minScore
+
+        node["moves"][move] = {}
+
+        node["moves"][move]["score"] = score
+        node["moves"][move]["moves"] = {}
+
+
+        #print("node: ", node)
+
+
+        #nextQueueMove = []
+
+        #nextQueueMove.insert(0,nextMove)
+        #nextQueueMove.append(move)
+        #print("nextQueueMove", nextQueueMove)
+
+
+        #queue.append(nextQueueMove)
+
+
 def getBestMoveSearchTree(board, nNodes):
 
     bestMove = getMoveRandom(board)
@@ -216,8 +258,7 @@ def getBestMoveSearchTree(board, nNodes):
                 queue.insert(0, [sortedMove[0]])
 
 
-    print("queue", queue)
-    #print("mov", moves['g8f6'])
+    #print("queue", queue)
 
     # always start from current board state
     while(searchedNodes < nNodes):
@@ -228,10 +269,10 @@ def getBestMoveSearchTree(board, nNodes):
 
         queueMove = queue.pop()
 
-        print(" ")
-        print("queueMove", len(queueMove) )
-        print("queueMove", queueMove )
-        print(" ")
+        #print(" ")
+        #print("queueMove", len(queueMove) )
+        #print("queueMove", queueMove )
+        #print(" ")
 
         #sortedMoves = sorted(moves.items(), key=lambda x: x[1][SCORE])
         #print("   ")
@@ -249,6 +290,7 @@ def getBestMoveSearchTree(board, nNodes):
 
         while len(queueMove)>0:
             searchDepth += 1
+
             nextMove = queueMove.pop()
 
             if False:
@@ -262,47 +304,18 @@ def getBestMoveSearchTree(board, nNodes):
 
             makeBoardMove(board, nextMove)
 
+
         legalMoves = getLegalMoves(board)
 
-        currentMoveTree = moves[nextMove][MOVES]
+        #currentMoveTree = moves[nextMove][MOVES]
 
-        minScore = 10000
-        maxScore = -10000
+        prevMoveNode = moves[nextMove]
+        searchNode(board, prevMoveNode, moves, nextMove)
 
-        for move in legalMoves:
-            #currentMoveTree[move] = {}
+        #print("queue", queue)
 
-            score = getScoreAfterMove(board, move)
-            #currentMoveTree[move][SCORE] = score
-            #currentMoveTree[move][MOVES] = {}
+        #moves[nextMove]["moves"] = currentMoveTree
 
-            maxScore = max(maxScore, score)
-            minScore = min(minScore, score)
-
-            # propegate score upwards (TODO?)
-            prevMoveNode = moves[nextMove]
-            if board.turn == chess.WHITE:
-                prevMoveNode["score"] = minScore
-            elif board.turn == chess.BLACK:
-                prevMoveNode["score"] = maxScore
-
-            prevMoveNode[move] = {}
-
-            prevMoveNode[move]["score"] = score
-            prevMoveNode[move]["moves"] = {}
-
-            nextQueueMove = []
-            nextQueueMove.insert(0,nextMove)
-            nextQueueMove.append(move)
-
-            print("nextQueueMove", nextQueueMove)
-
-            queue.append(nextQueueMove)
-
-        print("queue", queue)
-
-        moves[nextMove][MOVES] = currentMoveTree
-        #print("actual moves", json.dumps(moves, indent= 4))
 
         # board is reset to current state
         resetBoardX(board, searchDepth)
@@ -312,64 +325,21 @@ def getBestMoveSearchTree(board, nNodes):
             #moves[move][SCORE] = getScoreAfterMove(board, move)
             #moves[move][MOVES] = {}
 
-        print("actual moves", json.dumps(moves, indent= 4))
+        #print("actual moves", json.dumps(moves, indent= 4))
+    print("actual moves", json.dumps(moves, indent= 4))
 
-        sortedMoves = sorted(moves.items(), key=lambda x: x[1][SCORE])
+    sortedMoves = sorted(moves.items(), key=lambda x: x[1][SCORE])
 
-        bestMove = ""
-
-        if board.turn == chess.WHITE:
-            bestMove = sortedMoves[len(sortedMoves)-1][0]
-
-        elif board.turn == chess.BLACK:
-            bestMove = sortedMoves[0][0]
-
-    #resetBoardX(board, 1)
-    #sortedMoves = sorted(moves.items(), key=lambda x: x[1][SCORE])
+    bestMove = ""
 
     if board.turn == chess.WHITE:
-        # take last element "highest score"
-        bestMove = str(sortedMoves[len(sortedMoves)-1][0])
+        bestMove = sortedMoves[len(sortedMoves)-1][0]
+
     elif board.turn == chess.BLACK:
-        # take first element "lowest score"
-        bestMove = str(sortedMoves[0][0])
+        bestMove = sortedMoves[0][0]
 
+    #print("___________________RETURNING BEST MOVE__________________________")
 
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
-    print("________________________________________________________________")
     return str(bestMove)
 
 
@@ -638,6 +608,9 @@ for g in range(maxGames):
 
     for m in range(maxMoves):
 
+        if m%10 == 0:
+            print("move", m)
+
         # Check if game is over
         if board.is_stalemate():
             nDraw += 1
@@ -661,13 +634,12 @@ for g in range(maxGames):
         if board.turn == chess.WHITE:
             #move = getBestMove2Depthv3(board)
             #move = getMoveRandom(board)
-            move = getBestMove2Depth(board)
+            move = getBestMoveSearchTree(board, 1000)
 
         if board.turn == chess.BLACK:
-            move = getBestMoveSearchTree(board, 2)
-            #move = getBestMove3Depth(board)
-            #move = getBestMove2Depth(board)
-
+            #move = getBestMoveSearchTree(board, 1000)
+            move = getBestMove2Depth(board)
+            #move = getMoveRandom(board)
 
         makeBoardMove(board, move)
 
