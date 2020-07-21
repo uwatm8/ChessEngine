@@ -34,7 +34,10 @@ def makeBoardMove(board, move):
     move = str(move)
     global currentDepth
     if move != "":
-        board.push(chess.Move.from_uci(move))
+        #board.push(chess.Move.from_uci(move))
+        newMove = chess.Move.from_uci(move)
+        board.push(newMove)
+
         currentDepth += 1
 
     return board
@@ -61,14 +64,21 @@ def getScorePieces(board):
 
     score = 0
 
+    # make both players dont want to draw
     if board.is_stalemate():
         #print("HYPOTHETICAL STALEMATE")
-        return 0
+        if board.turn == chess.WHITE:
+            return -10
+        else:
+            return 10
 
     if board.can_claim_draw():
         # todo do min/max depending if below/over 0
         # print("CAN CLAIM DRAW")
-        return 0
+        if board.turn == chess.WHITE:
+            return -10
+        else:
+            return 10
 
     i = 0
 
@@ -182,7 +192,7 @@ def getScoreAfterMove(board, move):
     return score
 
 
-def searchNode(board, node, moves, previousMove):
+def searchNode(board, node, moves, previousMoves, queue):
     minScore = 10000
     maxScore = -10000
 
@@ -213,14 +223,14 @@ def searchNode(board, node, moves, previousMove):
         #print("node: ", node)
 
 
-        #nextQueueMove = []
+        nextQueueMove = []
 
-        #nextQueueMove.insert(0,nextMove)
-        #nextQueueMove.append(move)
-        #print("nextQueueMove", nextQueueMove)
+        nextQueueMove.extend(previousMoves)
+        nextQueueMove.append(move)
+        print("nextQueueMove", nextQueueMove)
 
 
-        #queue.append(nextQueueMove)
+        queue.insert(0,nextQueueMove)
 
 
 def getBestMoveSearchTree(board, nNodes):
@@ -288,29 +298,47 @@ def getBestMoveSearchTree(board, nNodes):
         # init with random move
         #nextMove = getMoveRandom(board)
 
+        madeMoves = queueMove.copy()
+
+
+
         while len(queueMove)>0:
-            searchDepth += 1
+
 
             nextMove = queueMove.pop()
+            if nextMove in getLegalMoves(board):
+                searchDepth += 1
 
-            if False:
+
                 if board.turn == chess.WHITE:
-                    #nextMove = sortedMoves[len(sortedMoves)-1][0]
-                    nextMove = queue[len(sortedMoves)-1]
-
-                elif board.turn == chess.BLACK:
-                    #nextMove = sortedMoves[0][0]
-                    nextMove = queue[0]
-
-            makeBoardMove(board, nextMove)
+                    print("WHITE making move")
+                else:
+                    print("BLACK making move")
 
 
-        legalMoves = getLegalMoves(board)
 
-        #currentMoveTree = moves[nextMove][MOVES]
+                print("move:", nextMove)
+
+                makeBoardMove(board, nextMove)
+
+                print(board)
+
+                if False:
+                    if board.turn == chess.WHITE:
+                        #nextMove = sortedMoves[len(sortedMoves)-1][0]
+                        nextMove = queue[len(sortedMoves)-1]
+
+                    elif board.turn == chess.BLACK:
+                        #nextMove = sortedMoves[0][0]
+                        nextMove = queue[0]
+
+                print("current Depth", searchDepth)
+
+
+        print("queue popped:", madeMoves)
 
         prevMoveNode = moves[nextMove]
-        searchNode(board, prevMoveNode, moves, nextMove)
+        searchNode(board, prevMoveNode, moves, madeMoves, queue)
 
         #print("queue", queue)
 
@@ -326,7 +354,7 @@ def getBestMoveSearchTree(board, nNodes):
             #moves[move][MOVES] = {}
 
         #print("actual moves", json.dumps(moves, indent= 4))
-    print("actual moves", json.dumps(moves, indent= 4))
+    #print("actual moves", json.dumps(moves, indent= 4))
 
     sortedMoves = sorted(moves.items(), key=lambda x: x[1][SCORE])
 
