@@ -138,6 +138,7 @@ def getScorePieces(board):
             score += positionValue
         elif char == "p":
             score -= 1
+            score += positionValue
 
         # White pieces
         elif char == "R":
@@ -156,6 +157,7 @@ def getScorePieces(board):
             score -= positionValue
         elif char == "P":
             score += 1
+            score += positionValue
 
     #print(board)
     #print(score)
@@ -185,7 +187,8 @@ for event in client.bots.stream_incoming_events():
         if should_accept(event):
             client.bots.accept_challenge(event['challenge']['id'])
             gameID = event['challenge']['id']
-            isWhite = event['challenge']['color'] == "white"
+            #event['challenge']['color'] is opponents color
+            isWhite = event['challenge']['color'] == "black"
             print("is white")
             print(isWhite)
 
@@ -197,7 +200,6 @@ for event in client.bots.stream_incoming_events():
             print("declining challange")
 
 print("done with loop")
-client.bots.make_move(gameID, 'e2e3')
 
 if not gameRunning:
     print("setting custom id @@@@@@@@@@@@@@@@@@@@@@")
@@ -729,8 +731,6 @@ for g in range(maxGames):
     savedGame = chess.pgn.Game()
     savedGame.headers["Event"] = "Example"
 
-    makeBoardMove(board, "e2e3")
-
     node = None
 
     for m in range(maxMoves):
@@ -738,14 +738,16 @@ for g in range(maxGames):
 
         print("move: ",m)
 
-        if m==0 and not isWhite:
-            pass
-        else:
-            pass
+        humanMove = ""
+
+        if isWhite and m==0:
+            print("passing")
+            client.bots.make_move(gameID, "e2e4")
+            makeBoardMove(board, "e2e4")
+
 
         gen = client.bots.stream_game_state(gameID)
 
-        humanMove = ""
         breakLoop = False
 
         while not breakLoop:
