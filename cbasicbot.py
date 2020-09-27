@@ -412,6 +412,8 @@ def getBestMoveSearchTree(board, nNodes):
 
 def getBestMove2Depth(board):
 
+    originalBoard = board.copy()
+
     legalMoves = getLegalMoves(board)
 
     bestScore = -10000
@@ -423,6 +425,7 @@ def getBestMove2Depth(board):
 
     for move in legalMoves:
         move = str(move)
+        board=originalBoard.copy()
 
         makeBoardMove(board, move)
         bestOpponentMove = getBestMove1Depth(board)
@@ -435,12 +438,47 @@ def getBestMove2Depth(board):
             bestScore = scoreD2
             bestMove = move
 
-        resetBoard(board)
+    board=originalBoard.copy()
 
     return bestMove
 
 
 def getBestMove3Depth(board):
+
+    originalBoard = board.copy()
+
+    legalMoves = getLegalMoves(board)
+
+    bestScore = -10000
+    colorScoreCorrection = 1
+    bestMove = ""
+
+    if board.turn == chess.BLACK:
+        colorScoreCorrection = -1
+
+    for move in legalMoves:
+        move = str(move)
+        board=originalBoard.copy()
+
+        makeBoardMove(board, move)
+        bestOpponentMove = getBestMove2Depth(board)
+        makeBoardMove(board, bestOpponentMove)
+
+        scoreD2 = getScorePieces(board) * colorScoreCorrection
+
+
+        if scoreD2 > bestScore:
+            bestScore = scoreD2
+            bestMove = move
+
+    board=originalBoard.copy()
+
+    return bestMove
+
+
+
+
+def getBestMove3Depthv0(board):
 
     legalMoves = getLegalMoves(board)
 
@@ -499,7 +537,58 @@ def getBestMove2Depthv2(board):
 
             board.push(chess.Move.from_uci(moveDepth2))
 
-            moveScoreDepth2 = getScorePieces(board)
+            moveScoreDepth2 = getScorePieces(board) * colorScoreCorrection
+            if moveScoreDepth2 > bestScore:
+                bestScore = moveScoreDepth2
+                bestMove = move
+
+            #reset until opponent move
+            board.pop()
+
+        #reset opponent move
+        board.pop()
+
+
+        #moveScore = getScorePieces(board) * colorScoreCorrection
+
+
+        # Reset board
+        board.pop()
+
+    return bestMove
+
+
+
+def getBestMove2Depthv3(board):
+
+    legalMoves = getLegalMoves(board)
+
+    bestScore = -10000
+    colorScoreCorrection = 1
+    bestMove = ""
+
+    if board.turn == chess.BLACK:
+        colorScoreCorrection = -1
+
+    for move in legalMoves:
+        move = str(move)
+
+        board.push(chess.Move.from_uci(move))
+
+
+
+        # opponent makes a move
+        bestOpponentMove = getBestMove2Depthv2(board)
+        board.push(chess.Move.from_uci(bestOpponentMove))
+
+        #responding move
+        legalMoves = getLegalMoves(board)
+        for moveDepth2 in legalMoves:
+            moveDepth2 = str(moveDepth2)
+
+            board.push(chess.Move.from_uci(moveDepth2))
+
+            moveScoreDepth2 = getScorePieces(board) * colorScoreCorrection
             if moveScoreDepth2 > bestScore:
                 bestScore = moveScoreDepth2
                 bestMove = move
@@ -694,7 +783,7 @@ for g in range(maxGames):
             #move = getBestMoveDepth2(board)
             #move = getMoveRandom(board)
             #move = getBestMoveSearchTree(board, 1000)
-            move = getBestMove2Depthv2(board)
+            move = getBestMove3Depth(board)
             #move = getBestMove1Depth(board)
             #move = getBestMoveSearchTree(board, 2000)
 
@@ -703,7 +792,7 @@ for g in range(maxGames):
             #move = getBestMoveSearchTree(board, 1000)
             #move = getBestMove2Depth(board)
             #move = getMoveRandom(board)
-            move = getBestMove2Depthv2(board)
+            move = getBestMove3Depth(board)
             #move = getBestMoveSearchTree(board, 2000)
             #move = getBestMove1Depth(board)
 
