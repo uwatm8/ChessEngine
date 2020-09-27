@@ -26,7 +26,7 @@ session = berserk.TokenSession("" + token)
 client = berserk.Client(session)
 
 gameRunning = False
-
+isWhite = True
 
 board = chess.Board()
 legalMoves = []
@@ -180,7 +180,6 @@ def should_accept(arg):
 
 should_decline_if_in_game = True
 for event in client.bots.stream_incoming_events():
-    print("asdasd")
     if event['type'] == 'challenge':
         print("event--------------------------------")
         print(event)
@@ -189,6 +188,10 @@ for event in client.bots.stream_incoming_events():
         if should_accept(event):
             client.bots.accept_challenge(event['challenge']['id'])
             gameID = event['challenge']['id']
+            isWhite = event['challenge']['color'] == "white"
+            print("is white")
+            print(isWhite)
+
             print("starting challange")
             gameRunning = True
             break
@@ -564,9 +567,6 @@ def getBestMoveDepth2(board):
 
 
 
-
-
-
 def getBestMoveDepth3(board):
 
     #print("iteration@@@@@@@@@@@@@@@@@@@@@@@@@")
@@ -638,6 +638,13 @@ for g in range(maxGames):
     for m in range(maxMoves):
         print("starting stuff")
 
+        print("move: ",m)
+
+        if m==0 and not isWhite:
+            pass
+        else:
+            pass
+
         gen = client.bots.stream_game_state(gameID)
 
         humanMove = ""
@@ -687,14 +694,18 @@ for g in range(maxGames):
             #move = getBestMoveDepth2(board)
             #move = getMoveRandom(board)
             #move = getBestMoveSearchTree(board, 1000)
-            move = getBestMove1Depth(board)
+            move = getBestMove2Depthv2(board)
+            #move = getBestMove1Depth(board)
+            #move = getBestMoveSearchTree(board, 2000)
 
         if board.turn == chess.BLACK:
             #move = getBestMoveDepth2(board)
             #move = getBestMoveSearchTree(board, 1000)
             #move = getBestMove2Depth(board)
             #move = getMoveRandom(board)
-            move = getBestMove1Depth(board)
+            move = getBestMove2Depthv2(board)
+            #move = getBestMoveSearchTree(board, 2000)
+            #move = getBestMove1Depth(board)
 
         print("best move: ")
         print(move)
