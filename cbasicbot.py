@@ -117,48 +117,45 @@ def getScorePieces(board):
 
         positionValue = -(distanceToCenter/1000000.0)
 
+
         #print("distance", multiplier)
 
 
         # Black pieces
         if char == "r":
-            score -= 5
+            score -= 5.63
             score -= positionValue
         elif char == "n":
-            score -= 2.9
+            score -= 3.05
             score -= positionValue
         elif char == "q":
-            score -= 9
-            score -= positionValue
+            score -= 9.5
         elif char == "b":
-            score -= 3
+            score -= 3.33
             score -= positionValue
         elif char == "k":
             score -= 1000
             score += positionValue
         elif char == "p":
             score -= 1
-            score -= positionValue
 
         # White pieces
         elif char == "R":
-            score += 5
+            score += 5.63
             score += positionValue
         elif char == "N":
-            score += 2.9
+            score += 3.05
             score += positionValue
         elif char == "Q":
-            score += 9
-            score += positionValue
+            score += 9.5
         elif char == "B":
-            score += 3
+            score += 3.33
             score += positionValue
         elif char == "K":
             score += 1000
             score -= positionValue
         elif char == "P":
             score += 1
-            score += positionValue
 
     #print(board)
     #print(score)
@@ -464,12 +461,24 @@ def getBestMove3Depth(board):
         bestOpponentMove = getBestMove2Depth(board)
         makeBoardMove(board, bestOpponentMove)
 
-        scoreD2 = getScorePieces(board) * colorScoreCorrection
+        originalBoard2 = board.copy()
 
 
-        if scoreD2 > bestScore:
-            bestScore = scoreD2
-            bestMove = move
+        legalMoves2 = getLegalMoves(board)
+
+        for move2 in legalMoves2:
+            move2 = str(move2)
+            board=originalBoard2.copy()
+
+            makeBoardMove(board, move2)
+
+            scoreD2 = getScorePieces(board) * colorScoreCorrection
+
+            
+
+            if scoreD2 > bestScore:
+                bestScore = scoreD2
+                bestMove = move
 
     board=originalBoard.copy()
 
