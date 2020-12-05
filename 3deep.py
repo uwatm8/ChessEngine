@@ -143,7 +143,7 @@ def getScorePieces(board):
             score += positionValue
         elif char == "p":
             score -= 1
-            score += positionValue
+            score -= positionValue
 
         # White pieces
         elif char == "R":
@@ -166,6 +166,7 @@ def getScorePieces(board):
 
     # print(board)
     # print(score)
+
     return score
 
 
@@ -757,7 +758,7 @@ for g in range(maxGames):
             #move = getBestMoveDepth2(board)
             #move = getMoveRandom(board)
             #move = getBestMoveSearchTree(board, 1000)
-            move = getBestMove2Depth(board)
+            move = getBestMove3Depth(board)
             #move = getBestMove1Depth(board)
             #move = getBestMoveSearchTree(board, 2000)
 
@@ -766,7 +767,7 @@ for g in range(maxGames):
             #move = getBestMoveSearchTree(board, 1000)
             #move = getBestMove2Depth(board)
             #move = getMoveRandom(board)
-            move = getBestMove2Depth(board)
+            move = getBestMove3Depth(board)
             #move = getBestMoveSearchTree(board, 2000)
             #move = getBestMove1Depth(board)
 

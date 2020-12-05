@@ -143,7 +143,7 @@ def getScorePieces(board):
             score += positionValue
         elif char == "p":
             score -= 1
-            score += positionValue
+            score -= positionValue
 
         # White pieces
         elif char == "R":
